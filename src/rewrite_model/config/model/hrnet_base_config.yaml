@@ -1,0 +1,5 @@
+BASE:  
+  BN_MOMENTUM: 0.1
+  ALIGN_CORNERS: True
+  RELU_INPLACE: True
+
