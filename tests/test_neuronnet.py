@@ -1,4 +1,4 @@
-from src.rewrite_model.models.neuronnet import NeuronNet
+from rewrite_model.models.backbones.neuronnet import NeuronNet
 import pytest
 
 @pytest.mark.base

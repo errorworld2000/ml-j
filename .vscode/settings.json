@@ -8,5 +8,9 @@
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.extraPaths": [
         // "./src"
+    ],
+    "cSpell.words": [
+        "huggingface",
+        "pycache"
     ]
 }
