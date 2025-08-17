@@ -1,3 +1,4 @@
+pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu129
 
 ## 参考
 > 1. **[PaddleSeg](https://blog.csdn.net/weixin_44669966/article/details/125664449)**  

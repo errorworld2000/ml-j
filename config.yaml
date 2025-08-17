@@ -1,0 +1,73 @@
+environment:
+  output_dir: outputs/default_experiment
+  seed: null
+
+batch_size: 2
+iters: 4000
+
+# ----------------------------------------------------
+# 数据集与变换 (Dataset and Transforms)
+# ----------------------------------------------------
+dataset:
+  train:
+    type: PetDataset
+    root_path: datasets/oxford_pets
+    transforms:
+      - type: Resize
+        size: [224, 224] # 调整到一个合适的尺寸
+      - type: RandomHorizontalFlip
+      - type: Normalize
+  val:
+    type: PetDataset
+    root_path: datasets/oxford_pets
+    transforms:
+      - type: Resize
+        size: [224, 224]
+      - type: Normalize
+
+
+# ----------------------------------------------------
+# 模型 (Model)
+# ----------------------------------------------------  
+model:
+  type: HRNetSegmentor
+  backbone:
+    type: HRNet_W18
+    pretrained: null
+  head:
+    type: SimpleSegmentationHead
+    num_classes: 3
+  bb_channels: 720
+  drop_prob: 0.1
+  proj_dim: 720
+
+
+
+# ----------------------------------------------------
+# 损失函数 (Loss Function)
+# ----------------------------------------------------
+loss:
+  types:
+    - type: CrossEntropyLoss
+    - type: PixelContrastCrossEntropyLoss
+      temperature: 0.1
+      base_temperature: 0.07
+      ignore_index: 255
+      max_samples: 1024
+      max_views: 100
+  coef: [1, 0.1]
+
+
+# ----------------------------------------------------
+# 优化器与学习率调度器 (Optimizer & LR Scheduler)
+# ----------------------------------------------------
+optimizer:
+  type: SGD
+  momentum: 0.9
+  weight_decay: 0.0002
+
+lr_scheduler:
+  type: PolynomialDecay
+  learning_rate: 0.01
+  end_lr: 0
+  power: 0.9

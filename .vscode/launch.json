@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Train",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "mini_ml.core.train",
+            "console": "integratedTerminal",
+            // "args": "${command:pickArgs}",
+            "args": [
+                "-c",
+                "config.yaml",
+                "-o",
+                "output/"
+            ],
+            "justMyCode": false,
+        }
+    ]
+}
