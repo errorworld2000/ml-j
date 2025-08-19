@@ -42,7 +42,6 @@ model:
   head:
     type: SimpleSegmentationHead
     num_classes: 19
-  bb_channels: 720
   drop_prob: 0.1
   proj_dim: 720
 

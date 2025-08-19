@@ -129,8 +129,8 @@ def train(config: AppConfig):
     max_iters = config.iters
 
     # 从配置中获取日志和保存间隔，并提供默认值
-    log_interval = config.training_control.get("log_interval", 50)
-    save_interval = config.training_control.get("save_interval", 1000)
+    log_interval = config.environment.log_interval
+    save_interval = config.environment.save_interval
 
     model.train()
 

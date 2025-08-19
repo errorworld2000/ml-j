@@ -44,6 +44,10 @@ class NormalizeConfig(ComponentConfig):
     type: Literal["Normalize"]
 
 
+class ToTensorConfig(ComponentConfig):
+    type: Literal["ToTensor"]
+
+
 # 使用 Union 来表示任何一种 Transform 配置
 TransformConfig = Union[
     ResizeConfig,
@@ -51,6 +55,7 @@ TransformConfig = Union[
     RandomHorizontalFlipConfig,
     RandomDistortConfig,
     NormalizeConfig,
+    ToTensorConfig,
 ]
 
 
@@ -68,7 +73,7 @@ class ModelConfig(ComponentConfig):
     backbone: BackboneConfig
     head: HeadConfig
     # 允许架构自身有额外的参数
-    bb_channels: Optional[int] = None
+    # bb_channels: Optional[int] = None
     drop_prob: Optional[float] = None
     proj_dim: Optional[int] = None
 
@@ -79,7 +84,7 @@ class CrossEntropyLossConfig(ComponentConfig):
     ignore_index: int = 255
 
 
-class PixelContrastLossConfig(ComponentConfig):
+class PixelContrastCrossEntropyLossConfig(ComponentConfig):
     type: Literal["PixelContrastCrossEntropyLoss"]
     temperature: float = 0.1
     base_temperature: float = 0.07
@@ -89,7 +94,7 @@ class PixelContrastLossConfig(ComponentConfig):
 
 
 # 使用 Union 来表示任何一种单一的损失配置
-SingleLossConfig = Union[CrossEntropyLossConfig, PixelContrastLossConfig]
+SingleLossConfig = Union[CrossEntropyLossConfig, PixelContrastCrossEntropyLossConfig]
 
 
 # 复合损失的配置
@@ -106,7 +111,22 @@ class SGDConfig(ComponentConfig):
     weight_decay: float = 0.0002
 
 
-OptimizerConfig = Union[SGDConfig]
+class AdamConfig(ComponentConfig):
+    type: Literal["Adam"]
+    lr: float = 0.001
+    betas: tuple[float, float] = (0.9, 0.999)
+    weight_decay: float = 0.0
+
+
+class AdamWConfig(ComponentConfig):
+    type: Literal["AdamW"]
+    lr: float = 0.001
+    betas: tuple[float, float] = (0.9, 0.999)
+    weight_decay: float = 0.01
+
+
+# 支持联合类型，方便配置文件解析
+OptimizerConfig = Union[SGDConfig, AdamConfig, AdamWConfig]
 
 
 # --- 5. 学习率调度器 (LR Scheduler) 组件 ---
@@ -131,6 +151,9 @@ class DatasetDetailConfig(BaseModel):
 class EnvironmentConfig(BaseModel):
     output_dir: str
     seed: Optional[int] = None
+    num_workers: int = 4
+    log_interval: int = 50
+    save_interval: int = 1000
 
 
 # --- 顶层配置结构 ---

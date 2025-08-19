@@ -94,6 +94,8 @@ class HRNet(nn.Module):
             self.stages.append(stage)
             prev_stage_channels = current_stage_channels
 
+        self.out_channels = sum(prev_stage_channels)
+
     def forward(self, x: torch.Tensor) -> list[torch.Tensor]:
         x = self.stem(x)
         x = self.layer1(x)
@@ -416,10 +418,11 @@ class TransitionLayer(nn.Module):
                 outs.append(conv(x[-1]))
         return outs
 
+
 class SimpleSegmentationHead(nn.Module):
     def __init__(self, in_channels: int, num_classes: int):
         super().__init__()
-        
+
         # 使用一个 1x1 卷积将特征图的通道数转换为类别数
         # 每个输出通道对应一个类别的得分图
         self.conv = nn.Conv2d(in_channels, num_classes, kernel_size=1)
@@ -427,6 +430,7 @@ class SimpleSegmentationHead(nn.Module):
     def forward(self, features: torch.Tensor) -> torch.Tensor:
         # features 是 HRNet backbone 输出的拼接后的特征图
         return self.conv(features)
+
 
 HRNET_RAW_CONFIGS: dict[str, dict[str, any]] = {
     "W18": {

@@ -108,12 +108,13 @@ class Registry:
 # CALLBACK_REGISTRY = Registry("callback")  # 用于注册回调函数。
 # LOGGER_REGISTRY = Registry("logger")  # 用于注册日志记录工具。
 
-SCHEDULERS = Registry("schedulers")  # 用于注册学习率调度器。
-MODELS = Registry("models")  # 用于注册具体模型实例。
-ARCH = Registry("arch")  # 用于注册和管理模型架构。
-HEADERS = Registry("headers")  # 用于注册模型头部。
+ARCHS = Registry("archs")  # 用于注册和管理模型架构。
 BACKBONES = Registry("backbones")  # 用于注册模型骨干网络。
 DATASETS = Registry("datasets")  # 用于注册数据集。
-TRANSFORMS = Registry("transforms")  # 用于注册数据转换。
+HEADS = Registry("heads")  # 用于注册模型头部。
 LOSSES = Registry("losses")  # 用于注册损失函数。
+LR_SCHEDULERS = Registry("lr_schedulers")  # 用于注册学习率调度器。
 OPTIMIZERS = Registry("optimizers")  # 用于注册优化器。
+TRANSFORMS = Registry("transforms")  # 用于注册数据转换。
+
+MODELS = Registry("models")  # 用于注册具体模型实例。

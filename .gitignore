@@ -3,3 +3,4 @@ __pycache__
 .venv
 .ruff_cache
 datasets
+!src/mini_ml/models/datasets

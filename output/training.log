@@ -1,5 +1,8 @@
-[2025-08-17 22:34:48] - Random seed set to 1755441288
-[2025-08-17 22:34:48] - All outputs will be saved to: D:\Repos\ml-j\output
-[2025-08-17 22:34:49] - Final configuration saved to config_final.yaml
-[2025-08-17 22:34:49] - Using device: cuda
-[2025-08-17 22:34:49] - Building components...
+[2025-08-19 11:47:43] - Random seed set to 1755575263
+[2025-08-19 11:47:43] - All outputs will be saved to: D:\Repos\ml-j\output
+[2025-08-19 11:47:43] - Final configuration saved to config_final.yaml
+[2025-08-19 11:47:43] - Using device: cuda
+[2025-08-19 11:47:43] - Building components...
+[2025-08-19 11:47:44] - Train dataset created with 7390 samples.
+[2025-08-19 11:47:44] - Components built successfully.
+[2025-08-19 11:47:44] - Starting training...

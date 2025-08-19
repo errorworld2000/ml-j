@@ -1,5 +1,7 @@
 import random
 
+import numpy as np
+import torch
 import torchvision.transforms.functional as F
 from PIL import Image
 from torchvision import transforms
@@ -39,19 +41,30 @@ class Resize:
         self.size = size
 
     def __call__(self, image, mask):
-        return F.resize(image, self.size), F.resize(
-            mask, self.size, interpolation=Image.Resampling.NEAREST
+        return (
+            F.resize(
+                image, self.size, interpolation=transforms.InterpolationMode.BILINEAR
+            ),
+            F.resize(
+                mask, self.size, interpolation=transforms.InterpolationMode.NEAREST
+            ),
         )
 
 
 @TRANSFORMS.register()
-class Compose:
-    """将多个变换组合在一起。"""
-
-    def __init__(self, transforms_list):
-        self.transforms = transforms_list
+class ToTensor:
+    """把 PIL Image 或 np.ndarray 转换成 Tensor，并把 mask 转为 long。"""
 
     def __call__(self, image, mask):
-        for t in self.transforms:
-            image, mask = t(image, mask)
+        # PIL → Tensor
+        if isinstance(image, Image.Image):
+            image = F.to_tensor(image)
+        elif isinstance(image, np.ndarray):
+            image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0
+
+        if isinstance(mask, Image.Image):
+            mask = torch.from_numpy(np.array(mask)).long()
+        elif isinstance(mask, np.ndarray):
+            mask = torch.from_numpy(mask).long()
+
         return image, mask

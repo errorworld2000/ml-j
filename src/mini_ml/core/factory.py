@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from torch import nn, optim
 from torch.utils.data import Dataset
 
-from mini_ml.dataset.trans import Compose
+from mini_ml.models.transforms.compose import Compose
 from mini_ml.models.losses.combined_loss import CombinedLoss
 from mini_ml.utils.config import (
     CombinedLossConfig,
@@ -15,14 +15,14 @@ from mini_ml.utils.config import (
 
 # 假设你已经有了所有组件的注册表
 from mini_ml.utils.register import (
-    ARCH,
+    ARCHS,
     BACKBONES,
     DATASETS,
-    HEADERS,
+    HEADS,
     LOSSES,
+    LR_SCHEDULERS,
     OPTIMIZERS,
     TRANSFORMS,
-    SCHEDULERS,
 )
 
 
@@ -72,9 +72,9 @@ def build_model(cfg: ModelConfig) -> nn.Module:
     """构建完整的模型。"""
     # 这里的逻辑更清晰：先构建零件，再组装
     backbone = build_from_cfg(cfg.backbone, BACKBONES)
-    head = build_from_cfg(cfg.head, HEADERS, in_channels=backbone.out_channels)
+    head = build_from_cfg(cfg.head, HEADS, in_channels=backbone.out_channels)
     # 架构本身也是一个组件
-    return build_from_cfg(cfg, ARCH, backbone=backbone, head=head)
+    return build_from_cfg(cfg, ARCHS, backbone=backbone, head=head)
 
 
 def build_loss(cfg: CombinedLossConfig) -> nn.Module:
@@ -92,14 +92,14 @@ def build_optimizer(cfg: OptimizerConfig, model: nn.Module) -> optim.Optimizer:
 
 def build_lr_scheduler(cfg: LR_SchedulerConfig, optimizer: optim.Optimizer, **kwargs):
     """构建学习率调度器。"""
-    return build_from_cfg(cfg, SCHEDULERS, optimizer=optimizer, **kwargs)
+    return build_from_cfg(cfg, LR_SCHEDULERS, optimizer=optimizer, **kwargs)
 
 
 def build_transforms(cfg_list: list) -> Compose:
     """根据配置列表构建一个数据变换流水线。"""
     transforms = []
     for transform_cfg in cfg_list:
-        cfg = transform_cfg.copy()
+        cfg = dict(transform_cfg)
         transform_name = cfg.pop("type")
         builder = TRANSFORMS.get(transform_name)
         if builder is None:
@@ -110,7 +110,7 @@ def build_transforms(cfg_list: list) -> Compose:
 
 def build_dataset(cfg: dict, mode: str) -> Dataset:
     """根据配置构建数据集。"""
-    dataset_cfg = cfg[mode].copy()
+    dataset_cfg = dict(cfg[mode])
     dataset_name = dataset_cfg.pop("type")
 
     # 1. 构建该数据集所需的数据变换

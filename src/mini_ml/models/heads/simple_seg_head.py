@@ -1,8 +1,8 @@
 from torch import nn
-from mini_ml.utils.register import HEADERS
+from mini_ml.utils.register import HEADS
 
 
-@HEADERS.register()
+@HEADS.register()
 class SimpleSegmentationHead(nn.Module):
     """简单的分割头部实现。"""
 
