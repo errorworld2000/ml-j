@@ -4,3 +4,4 @@ __pycache__
 .ruff_cache
 datasets
 !src/mini_ml/models/datasets
+output
