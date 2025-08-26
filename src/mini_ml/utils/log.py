@@ -2,6 +2,7 @@
 import logging
 import os
 from logging.handlers import TimedRotatingFileHandler
+from rich.logging import RichHandler
 
 DEFAULT_LOG_DIR = "logs"
 DEFAULT_LOG_LEVEL_FILE = logging.DEBUG
@@ -63,9 +64,8 @@ def setup_logger(
     log_obj.addHandler(file_handler)
 
     # 控制台 Handler
-    console_handler = logging.StreamHandler()
+    console_handler = RichHandler(rich_tracebacks=True, show_path=False)
     console_handler.setLevel(console_level)
-    console_handler.setFormatter(formatter)
     log_obj.addHandler(console_handler)
 
     return log_obj

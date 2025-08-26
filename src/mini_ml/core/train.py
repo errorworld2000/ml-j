@@ -9,9 +9,8 @@ import numpy as np
 import torch
 import yaml
 from rich.console import Console
+from torch.utils.tensorboard import SummaryWriter
 
-# 导入 rich 相关的库
-from rich.logging import RichHandler
 from rich.progress import (
     BarColumn,
     Progress,
@@ -21,8 +20,6 @@ from rich.progress import (
 )
 from torch.utils.data import DataLoader
 
-# 导入我们项目的所有核心组件
-# (请确保这些文件的路径相对于你的项目根目录是正确的)
 from mini_ml.utils.config import AppConfig
 
 from mini_ml.core.factory import (
@@ -33,9 +30,7 @@ from mini_ml.core.factory import (
     build_optimizer,
 )
 
-# (假设你已经创建了数据集和数据变换的相关文件)
-# from data import build_dataset, build_transforms
-# from torch.utils.data import DataLoader
+logger = logging.getLogger(__name__)
 
 
 def setup_seed(seed: Optional[int]):
@@ -52,24 +47,7 @@ def setup_seed(seed: Optional[int]):
     # 保证 cudnn 的确定性，这可能会牺牲一些性能
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-    logging.info(f"Random seed set to {seed}")
-
-
-def setup_logging(log_path: Path):
-    """
-    设置日志记录，同时将日志输出到文件和漂亮的 Rich 控制台。
-    """
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(message)s",
-        datefmt="[%Y-%m-%d %H:%M:%S]",
-        handlers=[
-            logging.FileHandler(log_path, mode="w"),  # 文件处理器，写入日志文件
-            RichHandler(
-                rich_tracebacks=True, show_path=False
-            ),  # Rich 控制台处理器，提供漂亮的输出
-        ],
-    )
+    logger.info("Random seed set to %d", seed)
 
 
 def train(config: AppConfig):
@@ -83,35 +61,36 @@ def train(config: AppConfig):
     checkpoints_dir = output_dir / "checkpoints"
     checkpoints_dir.mkdir(parents=True, exist_ok=True)
 
-    setup_logging(output_dir / "training.log")
     setup_seed(config.environment.seed)
 
-    logging.info(f"All outputs will be saved to: {output_dir}")
+    logger.info("All outputs will be saved to: %s", output_dir)
 
     # 将最终生效的配置也保存一份到输出目录，方便复现！
-    with open(output_dir / "config_final.yaml", "w") as f:
+    with open(output_dir / "config_final.yaml", "w", encoding="utf-8") as f:
         yaml.dump(config.model_dump(), f, indent=2, sort_keys=False)
-    logging.info("Final configuration saved to config_final.yaml")
+    logger.info("Final configuration saved to config_final.yaml")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    logging.info(f"Using device: {device}")
+    logger.info("Using device: %s", device)
+
+    # TensorBoard
+    # tensorboard_dir = output_dir / "tensorboard_logs"
+    # tensorboard_dir.mkdir(parents=True, exist_ok=True)
+    # writer = SummaryWriter(log_dir=str(tensorboard_dir))
+    # logger.info("TensorBoard logs will be saved to: %s", tensorboard_dir)
+    writer = SummaryWriter()
 
     # ==========================================================
     # 2. 构建所有组件
     # ==========================================================
-    logging.info("Building components...")
-    model = build_model(config.model)
-    model.to(device)
-
+    logger.info("Building components...")
+    model = build_model(config.model).to(device)
     criterion = build_loss(config.loss)
-
     optimizer = build_optimizer(config.optimizer, model)
-
     lr_scheduler = build_lr_scheduler(
         config.lr_scheduler, optimizer, max_iters=config.iters
     )
     train_dataset = build_dataset(config.dataset, mode="train")
-
     train_loader = DataLoader(
         dataset=train_dataset,
         batch_size=config.batch_size,
@@ -119,22 +98,19 @@ def train(config: AppConfig):
         num_workers=config.environment.num_workers,
         pin_memory=True,  # 如果使用 GPU，建议开启
     )
-    logging.info(f"Train dataset created with {len(train_dataset)} samples.")
-    logging.info("Components built successfully.")
+    logger.info("Train dataset created with %d samples.", len(train_dataset))
+    logger.info("Components built successfully.")
 
     # ==========================================================
     # 3. 训练循环
     # ==========================================================
-    logging.info("Starting training...")
+    logger.info("Starting training...")
     max_iters = config.iters
-
-    # 从配置中获取日志和保存间隔，并提供默认值
     log_interval = config.environment.log_interval
     save_interval = config.environment.save_interval
 
     model.train()
 
-    # 使用 rich.progress 创建一个漂亮的进度条
     with Progress(
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
@@ -153,7 +129,6 @@ def train(config: AppConfig):
         data_iterator = iter(train_loader)
         while current_iter < max_iters:
             try:
-                # 从迭代器中获取下一批数据
                 images, masks = next(data_iterator)
             except StopIteration:
                 # 如果 DataLoader 遍历完了一轮，就重新创建迭代器
@@ -163,7 +138,7 @@ def train(config: AppConfig):
             images = images.to(device)
             masks = masks.to(device)
 
-            # --- 核心训练五步曲 ---
+            # --- 核心训练 ---
             outputs = model(images)
             loss_dict = criterion(outputs, masks)
             total_loss = loss_dict["total_loss"]
@@ -176,29 +151,38 @@ def train(config: AppConfig):
             current_iter += 1
             progress.update(train_task, advance=1)
 
-            # --- 日志记录 ---
             if current_iter % log_interval == 0:
                 current_lr = optimizer.param_groups[0]["lr"]
                 loss_log_str = " | ".join(
                     [f"{k}: {v:.4f}" for k, v in loss_dict.items() if k != "total_loss"]
                 )
-                logging.info(
+                logger.info(
                     f"Iter: [{current_iter}/{max_iters}] | LR: {current_lr:.6f} | Loss: {total_loss.item():.4f} ({loss_log_str})"
                 )
+
+                # <<< TensorBoard 记录 >>>
+                # 记录总损失
+                writer.add_scalar("Loss/total", total_loss.item(), current_iter)
+                # 记录学习率
+                writer.add_scalar("Metrics/Learning_Rate", current_lr, current_iter)
+                # 记录各个分项损失
+                for k, v in loss_dict.items():
+                    if k != "total_loss":
+                        writer.add_scalar(f"Loss/{k}", v, current_iter)
 
             # --- 定期保存模型检查点 ---
             if current_iter > 0 and current_iter % save_interval == 0:
                 ckpt_path = checkpoints_dir / f"checkpoint_iter_{current_iter}.pth"
                 torch.save(model.state_dict(), ckpt_path)
-                logging.info(f"Checkpoint saved to {ckpt_path}")
+                logger.info("Checkpoint saved to {ckpt_path}")
 
     # ==========================================================
     # 4. 保存最终结果
     # ==========================================================
-    logging.info("Training Finished.")
+    logger.info("Training Finished.")
     final_model_path = output_dir / "final_model.pth"
     torch.save(model.state_dict(), final_model_path)
-    logging.info(f"Final model saved to: {final_model_path}")
+    logger.info("Final model saved to: %s", final_model_path)
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})

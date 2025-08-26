@@ -6,3 +6,4 @@ datasets
 !src/mini_ml/models/datasets
 output
 *.egg-info
+runs
