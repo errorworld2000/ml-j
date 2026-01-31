@@ -44,3 +44,4 @@ explicit = true
 
 [project.scripts]
 train="mini_ml.core.train:main"
+predict="mini_ml.core.predict:main"

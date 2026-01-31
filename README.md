@@ -4,10 +4,8 @@
 
 ## ✨ 功能清单
 
-- [ ] 训练(Found GPU0 NVIDIA GeForce GTX 1060 which is of cuda capability 6.1.
-    Minimum and Maximum cuda capability supported by this version of PyTorch is
-    (7.0) - (12.0))
-- [ ] 推理
+- [x] 训练
+- [x] 推理
 
 ## 🚀 环境准备与安装
 
@@ -22,11 +20,7 @@ cd ml-j
 
 ### **2. 安装 uv**
 
-如果你还没有安装 `uv`，可以通过 `pip` 进行安装：
-
-```bash
-pip install uv
-```
+官网安装
 
 ### **3. 创建并激活虚拟环境**
 
@@ -55,27 +49,19 @@ uv pip install -e .[dev]
 
 ### 训练
 
-你可以通过 `pyproject.toml` 中定义的脚本直接启动训练。
-
 ```bash
-train --config config.yaml
+uv run train
 ```
-
-请根据需要修改 `config.yaml` 文件中的配置。
 
 ### 推理
 
-运行 `predict.py` 脚本来进行推理：
-
-```bash
-python src/mini_ml/core/predict.py --config config.yaml --image path/to/your/image.jpg
+```shell
+uv run predict
 ```
 
-*(请注意: 上述命令是一个示例，具体参数请参照 `predict.py` 的实现)*
+## 📂 项目结构
 
-### Jupyter Notebook
-
-项目根目录下的 `main.ipynb` 提供了一个交互式的示例，你可以通过它来了解项目的核心功能。
+关于代码结构的详细分析，请查阅 [STRUCTURE.md](docs/STRUCTURE.md)。
 
 ## 📝 配置
 

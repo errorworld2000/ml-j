@@ -1,11 +1,11 @@
 environment:
   output_dir: outputs/default_experiment
   seed: null
-  num_workers: 4
+  num_workers: 8
   log_interval: 50
-  save_interval: 1000
+  save_interval: 500
 
-batch_size: 2
+batch_size: 32
 iters: 4000
 
 # ----------------------------------------------------

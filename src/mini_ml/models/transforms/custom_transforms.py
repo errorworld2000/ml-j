@@ -16,7 +16,7 @@ class Normalize:
     def __init__(self, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
         self.transform = transforms.Normalize(mean=mean, std=std)
 
-    def __call__(self, image, mask):
+    def __call__(self, image, mask=None):
         return self.transform(image), mask
 
 
@@ -27,9 +27,11 @@ class RandomHorizontalFlip:
     def __init__(self, p=0.5):
         self.p = p
 
-    def __call__(self, image, mask):
+    def __call__(self, image, mask=None):
         if random.random() < self.p:
-            return F.hflip(image), F.hflip(mask)
+            image = F.hflip(image)
+            if mask is not None:
+                mask = F.hflip(mask)
         return image, mask
 
 
@@ -40,31 +42,32 @@ class Resize:
     def __init__(self, size):
         self.size = size
 
-    def __call__(self, image, mask):
-        return (
-            F.resize(
-                image, self.size, interpolation=transforms.InterpolationMode.BILINEAR
-            ),
-            F.resize(
-                mask, self.size, interpolation=transforms.InterpolationMode.NEAREST
-            ),
+    def __call__(self, image, mask=None):
+        image = F.resize(
+            image, self.size, interpolation=transforms.InterpolationMode.BILINEAR
         )
+        if mask is not None:
+            mask = F.resize(
+                mask, self.size, interpolation=transforms.InterpolationMode.NEAREST
+            )
+        return image, mask
 
 
 @TRANSFORMS.register()
 class ToTensor:
     """把 PIL Image 或 np.ndarray 转换成 Tensor，并把 mask 转为 long。"""
 
-    def __call__(self, image, mask):
+    def __call__(self, image, mask=None):
         # PIL → Tensor
         if isinstance(image, Image.Image):
             image = F.to_tensor(image)
         elif isinstance(image, np.ndarray):
             image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0
 
-        if isinstance(mask, Image.Image):
-            mask = torch.from_numpy(np.array(mask)).long()
-        elif isinstance(mask, np.ndarray):
-            mask = torch.from_numpy(mask).long()
+        if mask is not None:
+            if isinstance(mask, Image.Image):
+                mask = torch.from_numpy(np.array(mask)).long()
+            elif isinstance(mask, np.ndarray):
+                mask = torch.from_numpy(mask).long()
 
         return image, mask

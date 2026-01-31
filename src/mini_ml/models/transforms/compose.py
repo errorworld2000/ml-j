@@ -8,7 +8,7 @@ class Compose:
     def __init__(self, transforms_list):
         self.transforms = transforms_list
 
-    def __call__(self, image, mask):
+    def __call__(self, image, mask=None):
         for t in self.transforms:
             image, mask = t(image, mask)
         return image, mask
