@@ -14,9 +14,14 @@ dependencies = [
     "rich>=14.1.0",
     "safetensors>=0.6.2",
     "tensorboard>=2.20.0",
-    "torch>=2.8.0",
+    "torch>=2.9.0",
     "torch-tb-profiler>=0.4.3",
     "torchvision>=0.23.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.12.8",
 ]
 
 [dependency-groups]
@@ -26,15 +31,15 @@ dev = [
 
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cu129", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+  { index = "pytorch-cu130", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
 ]
 torchvision = [
-  { index = "pytorch-cu129", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+  { index = "pytorch-cu130", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
 ]
 
 [[tool.uv.index]]
-name = "pytorch-cu129"
-url = "https://download.pytorch.org/whl/cu129"
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
 explicit = true
 
 [project.scripts]

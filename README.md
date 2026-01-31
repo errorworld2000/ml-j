@@ -47,6 +47,7 @@ source .venv/bin/activate
 
 ```bash
 # 安装项目和开发依赖
+uv sync
 uv pip install -e .[dev]
 ```
 

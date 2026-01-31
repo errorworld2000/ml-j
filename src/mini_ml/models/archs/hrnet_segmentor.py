@@ -37,6 +37,7 @@ class HRNetSegmentor(nn.Module):
         if self.dropout is not None:
             features = [self.dropout(f) for f in features]
         predictions = self.head(features)
+        predictions = F.interpolate(predictions, size=x.shape[2:], mode='bilinear', align_corners=False)
         outputs = {"pred": predictions}
         if self.training and self.proj_head is not None:
             feats = features[-1]

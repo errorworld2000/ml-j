@@ -87,7 +87,7 @@ def build_loss(cfg: CombinedLossConfig) -> nn.Module:
 
 def build_optimizer(cfg: OptimizerConfig, model: nn.Module) -> optim.Optimizer:
     """构建优化器。"""
-    return build_from_cfg(cfg, OPTIMIZERS, params=model.parameters())
+    return build_from_cfg(cfg, OPTIMIZERS, params=model.parameters()).get()
 
 
 def build_lr_scheduler(cfg: LR_SchedulerConfig, optimizer: optim.Optimizer, **kwargs):

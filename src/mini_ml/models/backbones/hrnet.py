@@ -163,8 +163,8 @@ class Branches(nn.Module):
 
     def forward(self, x: list[torch.Tensor]) -> list[torch.Tensor]:
         assert len(x) == len(
-            self.block_list
-        ), f"Expected {len(self.block_list)} inputs, but got {len(x)}"
+            self.branches
+        ), f"Expected {len(self.branches)} inputs, but got {len(x)}"
         outs = [branch(branch_input) for branch, branch_input in zip(self.branches, x)]
 
         return outs
@@ -232,7 +232,7 @@ class FuseLayer(nn.Module):
 
         for i in range(self.num_out_branches):
             y = x[i]
-            for j in enumerate(self.num_in_branches):
+            for j in range(self.num_in_branches):
                 if j == i:
                     pass
 

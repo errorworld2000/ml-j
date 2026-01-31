@@ -140,7 +140,7 @@ def train(config: AppConfig):
 
             # --- 核心训练 ---
             outputs = model(images)
-            loss_dict = criterion(outputs, masks)
+            loss_dict = criterion(outputs["pred"], masks)
             total_loss = loss_dict["total_loss"]
 
             optimizer.zero_grad()

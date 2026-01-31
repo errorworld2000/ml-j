@@ -150,7 +150,7 @@ class BottleneckBlock(nn.Module):
         output = self.conv2(output)
         output = self.conv3(output)
         if self.downsample:
-            residual = self.conv_down(x)
+            residual = self.downsample(x)
         output += residual
         output = self.relu(output)
         return output
